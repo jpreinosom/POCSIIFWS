@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sy:switchyard xmlns:bean="urn:switchyard-component-bean:config:1.1" xmlns:camel="urn:switchyard-component-camel:config:1.1" xmlns:file="urn:switchyard-component-camel-file:config:1.1" xmlns:http="urn:switchyard-component-http:config:1.1" xmlns:jms="urn:switchyard-component-camel-jms:config:1.1" xmlns:netty="urn:switchyard-component-camel-netty:config:1.1" xmlns:resteasy="urn:switchyard-component-resteasy:config:1.1" xmlns:sca="http://docs.oasis-open.org/ns/opencsa/sca/200912" xmlns:sy="urn:switchyard-config:switchyard:1.1" name="sw" targetNamespace="urn:com.example.switchyard:sw:1.0">
+  <sca:composite name="sw" targetNamespace="urn:com.example.switchyard:sw:1.0">
+    <sca:component name="ClienteRestBean">
+      <bean:implementation.bean class="com.example.switchyard.sw.ClienteRestBean"/>
+      <sca:service name="ClienteRest">
+        <sca:interface.java interface="com.example.switchyard.sw.ClienteRest"/>
+      </sca:service>
+    </sca:component>
+    <sca:component name="ProcesaArchivoBean">
+      <camel:implementation.camel>
+        <camel:java class="com.example.switchyard.sw.ProcesaArchivoRoute"/>
+      </camel:implementation.camel>
+      <sca:service name="ProcesaArchivo">
+        <sca:interface.java interface="com.example.switchyard.sw.ProcesaArchivo"/>
+      </sca:service>
+      <sca:reference name="ClienteRest">
+        <sca:interface.java interface="com.example.switchyard.sw.ClienteRest"/>
+      </sca:reference>
+    </sca:component>
+    <sca:service name="ProcesaArchivo" promote="ProcesaArchivoBean/ProcesaArchivo">
+      <sca:interface.java interface="com.example.switchyard.sw.ProcesaArchivo"/>
+      <file:binding.file name="file1">
+        <file:directory>/Users/rasilvadelgado/Desktop/archivo</file:directory>
+        <file:fileName>nomina.txt</file:fileName>
+        <file:consume>
+          <file:move>/Users/rasilvadelgado/Desktop/archivo/ok</file:move>
+          <file:moveFailed>/Users/rasilvadelgado/Desktop/archivo/failed</file:moveFailed>
+        </file:consume>
+      </file:binding.file>
+    </sca:service>
+    <sca:component name="LogBean">
+      <bean:implementation.bean class="cl.util.LogBean"/>
+      <sca:service name="Log">
+        <sca:interface.java interface="cl.util.Log"/>
+      </sca:service>
+      <sca:reference name="GuardaLogService">
+        <sca:interface.java interface="com.example.switchyard.sw.GuardaLogService"/>
+      </sca:reference>
+    </sca:component>
+    <sca:service name="Log" promote="LogBean/Log">
+      <sca:interface.java interface="cl.util.Log"/>
+      <resteasy:binding.rest name="rest1">
+        <resteasy:interfaces>cl.util.LogResource</resteasy:interfaces>
+        <resteasy:contextPath>sii</resteasy:contextPath>
+      </resteasy:binding.rest>
+    </sca:service>
+    <sca:component name="GiroServiceBean">
+      <bean:implementation.bean class="com.example.switchyard.sw.GiroServiceBean"/>
+      <sca:service name="GiroService">
+        <sca:interface.java interface="com.example.switchyard.sw.GiroService"/>
+      </sca:service>
+      <sca:reference name="EmiteGiroService">
+        <sca:interface.java interface="com.example.switchyard.sw.EmiteGiroService"/>
+      </sca:reference>
+    </sca:component>
+    <sca:service name="GiroService" promote="GiroServiceBean/GiroService">
+      <sca:interface.java interface="com.example.switchyard.sw.GiroService"/>
+      <resteasy:binding.rest name="rest1">
+        <resteasy:interfaces>com.example.switchyard.sw.GiroResource</resteasy:interfaces>
+        <resteasy:contextPath>sii</resteasy:contextPath>
+      </resteasy:binding.rest>
+    </sca:service>
+    <sca:component name="GuardaLogServiceBean">
+      <bean:implementation.bean class="com.example.switchyard.sw.GuardaLogServiceBean"/>
+      <sca:service name="GuardaLogService">
+        <sca:interface.java interface="com.example.switchyard.sw.GuardaLogService"/>
+      </sca:service>
+    </sca:component>
+    <sca:component name="EmiteGiroServiceBean">
+      <bean:implementation.bean class="com.example.switchyard.sw.EmiteGiroServiceBean"/>
+      <sca:service name="EmiteGiroService">
+        <sca:interface.java interface="com.example.switchyard.sw.EmiteGiroService"/>
+      </sca:service>
+    </sca:component>
+  </sca:composite>
+  <sy:domain>
+    <sy:properties>
+      <sy:property name="DEPLOYMENT_ID" value="cii.sii.domain:Nomina_contribuyentes:1.0"/>
+      <sy:property name="username" value="javier"/>
+      <sy:property name="password" value="Redhat2014."/>
+      <sy:property name="BASE_URL" value="http://10.96.49.79:8080/business-central/rest/"/>
+      <sy:property name="PROCESS_DEF_ID" value="Nomina_contribuyentes.Asignacion_casos"/>
+      <sy:property name="org.switchyard.handlers.messageTrace.enabled" value="false"/>
+    </sy:properties>
+  </sy:domain>
+</sy:switchyard>
